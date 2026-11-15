@@ -3,35 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Beranda | SITTA UT</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>SITTA - Pemesanan Bahan Ajar UT</title>
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="index.html"><span class="logo"><img src="assets/logo-ut.png" alt="Logo Universitas Terbuka"></span> SITTA UT</a>
-    <nav aria-label="Menu utama">
-      <a href="index.html" class="active" aria-current="page">Beranda</a>
-      <a href="stok.html">Stok Bahan Ajar</a>
-      <a href="tracking.html">Tracking DO</a>
-    </nav>
-  </header>
+  <div id="app" v-cloak>
+    <header class="topbar">
+      <h1>📚 SITTA <small>Bahan Ajar UT</small></h1>
+      <nav>
+        <button :class="{active: tab==='stok'}" @click="tab='stok'">Stok</button>
+        <button :class="{active: tab==='tracking'}" @click="tab='tracking'">Tracking DO</button>
+        <button :class="{active: tab==='order'}" @click="tab='order'">Pemesanan</button>
+      </nav>
+    </header>
 
-  <main class="container">
-    <section class="hero" aria-labelledby="judul">
-      <h1 id="judul">Aplikasi Pemesanan Bahan Ajar SITTA</h1>
-      <p>Pantau stok bahan ajar di seluruh UT-Daerah dan lacak status pengiriman Delivery Order (DO). Dibuat dengan Vue.js.</p>
-    </section>
+    <main class="container">
+      <section v-show="tab==='stok'">
+        <ba-stock-table :items="state.stok"
+                        :upbjj-list="state.upbjjList"
+                        :kategori-list="state.kategoriList"
+                        @create="addStok" @update="updateStok" @delete="deleteStok"></ba-stock-table>
+      </section>
+      <section v-show="tab==='tracking'">
+        <do-tracking :items="state.tracking" :paket="state.paket"
+                     @add-progress="addProgress"></do-tracking>
+      </section>
+      <section v-show="tab==='order'">
+        <order-form :paket="state.paket" :ekspedisi="state.pengirimanList"
+                    :stok="state.stok" :tracking="state.tracking"
+                    @created="handleNewDO"></order-form>
+      </section>
+    </main>
 
-    <section class="menu-grid" aria-label="Menu">
-      <a class="menu-tile" href="stok.html">
-        <strong>Stok Bahan Ajar</strong>
-        <span>Lihat, filter, urutkan, tambah, dan edit stok. Ada penanda stok aman, menipis, dan kosong.</span>
-      </a>
-      <a class="menu-tile" href="tracking.html">
-        <strong>Tracking Delivery Order</strong>
-        <span>Cari status DO dan buat DO baru dengan nomor otomatis.</span>
-      </a>
-    </section>
-  </main>
+    <transition name="fade"><div class="toast" v-if="toast">{{ toast }}</div></transition>
+    <app-modal :show="infoModal" title="Informasi" @close="infoModal=false">
+      <p>{{ infoText }}</p>
+      <div class="actions"><button class="btn primary" @click="infoModal=false">OK</button></div>
+    </app-modal>
+  </div>
+
+  <!-- Template dimuat otomatis dari folder /templates oleh app.js (id: tpl-stock, tpl-tracking, tpl-order, tpl-badge, tpl-modal) -->
+
+  <!-- Scripts (urutan penting) -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <script src="js/services/api.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/components/status-badge.js"></script>
+  <script src="js/components/app-modal.js"></script>
+  <script src="js/components/stock-table.js"></script>
+  <script src="js/components/do-tracking.js"></script>
+  <script src="js/components/order-form.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
